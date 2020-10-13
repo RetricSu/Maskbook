@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import {
     makeStyles,
     createStyles,
@@ -16,6 +16,7 @@ import classNames from 'classnames'
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail'
 import CloseIcon from '@material-ui/icons/Close'
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined'
+import { ArrowRight } from 'react-feather'
 import stringify from 'json-stable-stringify'
 import ActionButton, { ActionButtonPromise } from '../../extension/options-page/DashboardComponents/ActionButton'
 import { merge, cloneDeep, noop } from 'lodash-es'
@@ -250,6 +251,9 @@ const useFindUsernameStyles = makeStyles((theme) =>
         icon: {
             color: theme.palette.text.secondary,
         },
+        arrowIcon: {
+            cursor: 'pointer',
+        },
     }),
 )
 
@@ -268,17 +272,26 @@ function FindUsername({ username, onConnect, onDone, onClose, onUsernameChange =
     const findUsernameClasses = useFindUsernameStyles()
     const [binder, inputRef] = useCapturedInput(onUsernameChange)
 
+    // disable enter
     useEffect(
         () =>
             binder(['keydown'], (e) => {
                 e.stopPropagation()
-                if (e.key === 'Enter') {
-                    e.preventDefault()
-                    ui.taskGotoProfilePage(new ProfileIdentifier(ui.networkIdentifier, username))
-                }
+                if (e.key !== 'Enter') return
+                e.preventDefault()
+                onConnect()
             })(),
         [onConnect, binder],
     )
+
+    const onJump = useCallback(
+        (ev: React.MouseEvent<SVGElement>) => {
+            ev.preventDefault()
+            ui.taskGotoProfilePage(new ProfileIdentifier(ui.networkIdentifier, username))
+        },
+        [username],
+    )
+
     return (
         <WizardDialog
             completion={33.33}
@@ -300,6 +313,14 @@ function FindUsername({ username, onConnect, onDone, onClose, onUsernameChange =
                                     <AlternateEmailIcon className={findUsernameClasses.icon} />
                                 </InputAdornment>
                             ),
+                            endAdornment: username ? (
+                                <InputAdornment position="end">
+                                    <ArrowRight
+                                        className={classNames(findUsernameClasses.icon, findUsernameClasses.arrowIcon)}
+                                        onClick={onJump}
+                                    />
+                                </InputAdornment>
+                            ) : null,
                         }}
                         inputRef={inputRef}
                         inputProps={{ 'data-testid': 'username_input' }}></TextField>
