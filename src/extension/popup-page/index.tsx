@@ -1,12 +1,11 @@
 import '../../social-network-provider/popup-page/index'
 import '../../setup.ui'
-import React, { useMemo, useCallback } from 'react'
+import React, { useCallback } from 'react'
 
 import { ThemeProvider, makeStyles, Theme, withStyles } from '@material-ui/core/styles'
-import { Button, useMediaQuery, Paper, Divider, Typography, Box } from '@material-ui/core'
-import { MaskbookLightTheme, MaskbookDarkTheme } from '../../utils/theme'
+import { Button, Paper, Divider, Typography, Box } from '@material-ui/core'
+import { useMaskbookTheme } from '../../utils/theme'
 import { SSRRenderer } from '../../utils/SSRRenderer'
-import { appearanceSettings, Appearance } from '../../settings/settings'
 import { ChooseIdentity } from '../../components/shared/ChooseIdentity'
 import { getActivatedUI } from '../../social-network/ui'
 import { I18nextProvider } from 'react-i18next'
@@ -154,16 +153,7 @@ function PopupUI() {
 }
 
 function Popup() {
-    const preferDarkScheme = useMediaQuery('(prefers-color-scheme: dark)')
-    const appearance = useValueRef(appearanceSettings)
-    const theme = useMemo(
-        () => ({
-            ...((preferDarkScheme && appearance === Appearance.default) || appearance === Appearance.dark
-                ? MaskbookDarkTheme
-                : MaskbookLightTheme),
-        }),
-        [preferDarkScheme, appearance],
-    )
+    const theme = useMaskbookTheme()
     return (
         <ThemeProvider theme={theme}>
             <I18nextProvider i18n={i18nNextInstance}>
